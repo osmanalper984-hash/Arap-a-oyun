@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arapça Meslek Çarkıfelek</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .score {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-item {
+            display: inline-block;
+            margin: 0 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .correct { color: #4ade80; }
+        .wrong { color: #f87171; }
+
+        .wheel-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin: 0 auto 30px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid white;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #fbbf24;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+
+        .spin-btn {
+            display: block;
+            margin: 0 auto 30px;
+            padding: 15px 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .spin-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .spin-btn:active {
+            transform: scale(0.95);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .question-area {
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            color: #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .question {
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .profession-name {
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #764ba2;
+            font-weight: bold;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option {
+            padding: 20px;
+            font-size: 1.5em;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-weight: bold;
+            direction: rtl;
+        }
+
+        .option:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .option.correct {
+            background: #4ade80;
+            border-color: #22c55e;
+            color: white;
+        }
+
+        .option.wrong {
+            background: #f87171;
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8em; }
+            .wheel-container { width: 280px; height: 280px; }
+            .options { grid-template-columns: 1fr; }
+            .option { font-size: 1.3em; }
+            .question { font-size: 1.4em; }
+            .profession-name { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎡 Arapça Meslek Çarkıfelek 🎡</h1>
+        
+        <div class="score">
+            <div class="score-item correct">✅ Doğru: <span id="correct">0</span></div>
+            <div class="score-item wrong">❌ Yanlış: <span id="wrong">0</span></div>
+        </div>
+
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheel" class="wheel" width="350" height="350"></canvas>
+        </div>
+
+        <button class="spin-btn" id="spinBtn">ÇARKI ÇEVİR</button>
+
+        <div class="question-area hidden" id="questionArea">
+            <div class="question">Bu mesleğin Arapçası nedir?</div>
+            <div class="profession-name" id="professionName"></div>
+            <div class="options" id="options"></div>
+        </div>
+    </div>
+
+    <script>
+        const professions = [
+            {tr: "Doktor", ar: "طَبِيبٌ"},
+            {tr: "Öğretmen", ar: "مُعَلِّمٌ"},
+            {tr: "Mühendis", ar: "مُهَنْدِسٌ"},
+            {tr: "Pilot", ar: "طَيَّارٌ"},
+            {tr: "Hemşire", ar: "مُمَرِّضَةٌ"},
+            {tr: "Polis", ar: "شُرْطِيٌّ"},
+            {tr: "Avukat", ar: "مُحَامٍ"},
+            {tr: "Aşçı", ar: "طَبَّاخٌ"},
+            {tr: "Berber", ar: "حَلَّاقٌ"},
+            {tr: "Terzi", ar: "خَيَّاطٌ"},
+            {tr: "Ressam", ar: "رَسَّامٌ"},
+            {tr: "Şarkıcı", ar: "مُغَنٍّ"},
+            {tr: "Sporcu", ar: "رِيَاضِيٌّ"},
+            {tr: "Gazeteci", ar: "صَحَفِيٌّ"},
+            {tr: "Fotoğrafçı", ar: "مُصَوِّرٌ"},
+            {tr: "Yazar", ar: "كَاتِبٌ"},
+            {tr: "Çiftçi", ar: "فَلَّاحٌ"},
+            {tr: "Kasap", ar: "قَصَّابٌ"},
+            {tr: "Bakkal", ar: "بَقَّالٌ"},
+            {tr: "Eczacı", ar: "صَيْدَلِيٌّ"},
+            {tr: "Dişçi", ar: "طَبِيبُ أَسْنَانٍ"},
+            {tr: "Asker", ar: "جُنْدِيٌّ"},
+            {tr: "İtfaiyeci", ar: "رَجُلُ إِطْفَاءٍ"},
+            {tr: "Postacı", ar: "سَاعِي بَرِيدٍ"},
+            {tr: "Sürücü", ar: "سَائِقٌ"},
+            {tr: "Marangoz", ar: "نَجَّارٌ"},
+            {tr: "Elektrikçi", ar: "كَهْرَبَائِيٌّ"},
+            {tr: "Boyacı", ar: "دَهَّانٌ"},
+            {tr: "Temizlikçi", ar: "عَامِلُ نَظَافَةٍ"},
+            {tr: "Garson", ar: "نَادِلٌ"},
+            {tr: "Muhasebeci", ar: "مُحَاسِبٌ"},
+            {tr: "Sekreter", ar: "سِكْرِتِيرٌ"},
+            {tr: "Çevirmen", ar: "مُتَرْجِمٌ"},
+            {tr: "Öğrenci", ar: "طَالِبٌ"},
+            {tr: "Müdür", ar: "مُدِيرٌ"},
+            {tr: "İşçi", ar: "عَامِلٌ"},
+            {tr: "Satıcı", ar: "بَائِعٌ"},
+            {tr: "Kütüphaneci", ar: "أَمِينُ مَكْتَبَةٍ"},
+            {tr: "Müzisyen", ar: "مُوسِيقِيٌّ"},
+            {tr: "Dalgıç", ar: "غَوَّاصٌ"},
+            {tr: "Bahçıvan", ar: "بُسْتَانِيٌّ"},
+            {tr: "Veteriner", ar: "طَبِيبٌ بَيْطَرِيٌّ"},
+            {tr: "Memur", ar: "مُوَظَّفٌ"},
+            {tr: "Hakim", ar: "قَاضٍ"},
+            {tr: "Sanatçı", ar: "فَنَّانٌ"},
+            {tr: "Bilim İnsanı", ar: "عَالِمٌ"},
+            {tr: "Balıkçı", ar: "صَيَّادُ سَمَكٍ"},
+            {tr: "Teknisyen", ar: "تِقْنِيٌّ"},
+            {tr: "Danışman", ar: "مُسْتَشَارٌ"},
+            {tr: "Rehber", ar: "دَلِيلٌ"}
+        ];
+
+        let correctCount = 0;
+        let wrongCount = 0;
+        let currentProfession = null;
+        let isSpinning = false;
+
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const questionArea = document.getElementById('questionArea');
+
+        const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 10;
+            const sliceAngle = (2 * Math.PI) / professions.length;
+
+            for (let i = 0; i < professions.length; i++) {
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, i * sliceAngle, (i + 1) * sliceAngle);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(i * sliceAngle + sliceAngle / 2);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 10px Arial';
+                ctx.fillText(professions[i].tr, radius / 2, 5);
+                ctx.restore();
+            }
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            spinBtn.disabled = true;
+            questionArea.classList.add('hidden');
+
+            const randomIndex = Math.floor(Math.random() * professions.length);
+            const sliceAngle = 360 / professions.length;
+            const targetRotation = 360 * 5 + (randomIndex * sliceAngle) + (sliceAngle / 2);
+
+            canvas.style.transform = `rotate(${targetRotation}deg)`;
+
+            setTimeout(() => {
+                currentProfession = professions[randomIndex];
+                showQuestion();
+                isSpinning = false;
+                spinBtn.disabled = false;
+            }, 4000);
+        }
+
+        function showQuestion() {
+            document.getElementById('professionName').textContent = currentProfession.tr;
+            
+            const wrongAnswers = professions.filter(p => p.ar !== currentProfession.ar);
+            const shuffled = wrongAnswers.sort(() => Math.random() - 0.5).slice(0, 3);
+            const allOptions = [...shuffled, currentProfession].sort(() => Math.random() - 0.5);
+
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+
+            allOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = option.ar;
+                btn.onclick = () => checkAnswer(option.ar, btn);
+                optionsDiv.appendChild(btn);
+            });
+
+            questionArea.classList.remove('hidden');
+        }
+
+        function checkAnswer(selected, btn) {
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(opt => opt.classList.add('disabled'));
+
+            if (selected === currentProfession.ar) {
+                btn.classList.add('correct');
+                correctCount++;
+                document.getElementById('correct').textContent = correctCount;
+            } else {
+                btn.classList.add('wrong');
+                wrongCount++;
+                document.getElementById('wrong').textContent = wrongCount;
+                
+                allOptions.forEach(opt => {
+                    if (opt.textContent === currentProfession.ar) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+
+            setTimeout(() => {
+                canvas.style.transform = 'rotate(0deg)';
+            }, 2000);
+        }
+
+        spinBtn.addEventListener('click', spinWheel);
+        drawWheel();
+    </script>
+</body>
+</html>
