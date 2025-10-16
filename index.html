@@ -1,127 +1,56 @@
-// Girdi almak için basit bir simülasyon fonksiyonu (Öncekiyle aynı)
-function simulateInput(message, validOptions) {
-    console.log(message);
-    console.log(`(Simülasyon: Geçerli seçenekler: ${validOptions.join(', ')} )`);
-    
-    let input;
-    if (validOptions.includes(2) || validOptions.includes(3) || validOptions.includes(4)) {
-        input = 2; // Grup oyuncu sayısı
-    } else if (validOptions.includes(30) || validOptions.includes(60) || validOptions.includes(90)) {
-        input = 60; // Süre
-    } else if (validOptions.includes('1') || validOptions.includes('2')) {
-        input = '2'; // Ana menü seçimi
-    } else {
-        input = validOptions[0];
-    }
-    
-    console.log(`[Simüle Edilen Seçim: ${input}]`);
-    
-    if (validOptions.includes(input.toString()) || validOptions.includes(parseInt(input))) {
-        return input.toString();
-    }
-    return null; 
-}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arap Yemeği Bilme Oyunu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <div id="container">
+        <h1>Arap Yemeği Bilme Oyunu</h1>
+        <div id="game-area">
+            
+            <div id="main-menu" class="screen active">
+                <h2>ANA MENÜ</h2>
+                <button onclick="showScreen('group-setup')">2 - Grup Oynama</button>
+                <button onclick="showScreen('individual-start')">1 - Bireysel Oynama</button>
+            </div>
 
-// Yeni Çark Mekanizması ve Arapça Yemekler
-const arapcaYemekler = [
-    "كُبَّة (Kibbeh)", "مَنْسَف (Mansaf)", "فَتُوش (Fattoush)", 
-    "مُحَمَّرَة (Muhammara)", "حُمُّص (Hummus)", "مَسْقُوف (Masgouf)", 
-    "مَقْلُوبَة (Maqluba)", "شَاوَرْمَا (Shawarma)", "فَلافِل (Falafel)",
-    "تَبُّولَة (Tabbouleh)", // 10 tane temsili yemek. 
-    // Gerçek uygulamada buraya 40 tane daha yemek eklenecek.
-];
+            <div id="group-setup" class="screen">
+                <h2>GRUP OYUNU KURULUMU</h2>
 
-function carkiDondur() {
-    // Diziden rastgele bir indeks seçer
-    const randomIndex = Math.floor(Math.random() * arapcaYemekler.length);
-    const secilenYemek = arapcaYemekler[randomIndex];
-    
-    console.log("\n*** ÇARK DÖNDÜRÜLÜYOR... ***");
-    console.log(`--> Seçilen Yemek (SORU): ${secilenYemek}`);
-    console.log("***************************");
-    
-    return secilenYemek;
-}
+                <label for="player-count">Kaç kişi oynamak istersiniz?</label>
+                <select id="player-count">
+                    <option value="2">2 Kişi</option>
+                    <option value="3">3 Kişi</option>
+                    <option value="4">4 Kişi</option>
+                </select>
 
+                <label for="time-limit">Soru Başına Süre (saniye):</label>
+                <select id="time-limit">
+                    <option value="30">30 saniye</option>
+                    <option value="60">60 saniye</option>
+                    <option value="90">90 saniye</option>
+                </select>
+                
+                <p class="rule">Kural: En çok doğru bilen taraf (grup) kazanır.</p>
+                <button onclick="startGroupGame()">Oyunu Başlat</button>
+                <button class="back-button" onclick="showScreen('main-menu')">Geri Dön</button>
+            </div>
 
-// Grup Oynama fonksiyonu (Kurulum ve Çark Kullanımı)
-function grupOyunuKurulum() {
-    console.log("\n--- Grup Oyunu Kurulumu ---");
+            <div id="game-screen" class="screen">
+                <h2>OYUN BAŞLADI!</h2>
+                <div id="game-details"></div>
+                <div id="spin-result"></div>
+                <button onclick="carkiDondur()">YENİ YEMEK SEÇ (ÇARKI DÖNDÜR)</button>
+                <button class="back-button" onclick="showScreen('main-menu', true)">Ana Menüye Dön</button>
+            </div>
 
-    const oyuncuSayisi = simulateInput(
-        "Kaç kişi oynamak istersiniz (2, 3 veya 4)?",
-        [2, 3, 4]
-    );
+        </div>
+    </div>
 
-    if (!oyuncuSayisi) return;
-
-    const sure = simulateInput(
-        `Her bir soru için ne kadar süreniz olsun (30, 60 veya 90 saniye)?`,
-        [30, 60, 90]
-    );
-    
-    if (!sure) return;
-
-    console.log("\n--- Grup Oyunu Başlıyor ---");
-    console.log(`Oyuncu Sayısı: ${oyuncuSayisi}, Soru Başına Süre: ${sure} saniye.`);
-    
-    // Yemek çarkını döndür ve oyunu başlat
-    const ilkSoru = carkiDondur();
-    
-    console.log(`Şimdi grup olarak ${ilkSoru} yemeğini bilmeye çalışın! Süreniz: ${sure} saniye.`);
-}
-
-
-// Bireysel Oynama fonksiyonu (Kurulum ve Çark Kullanımı)
-function bireyselOyunKurulum() {
-    console.log("\n--- Bireysel Oynama Seçeneği ---");
-    console.log("Bireysel oyun detayları henüz belirlenmemiştir. Ancak sorunuzu çark seçecek.");
-    
-    const ilkSoru = carkiDondur();
-    
-    console.log(`Şimdi tek başına ${ilkSoru} yemeğini bilmeye çalışın!`);
-}
-
-
-// Ana Menü fonksiyonu
-function anaMenu() {
-    let calisiyor = true;
-
-    while (calisiyor) {
-        console.log("\n" + "=".repeat(30));
-        console.log("         ANA MENÜ");
-        console.log("=".repeat(30));
-        console.log("1 - Bireysel Oynama");
-        console.log("2 - Grup Oynama");
-        console.log("3 - Çıkış");
-        console.log("=".repeat(30));
-
-        const secim = simulateInput(
-            "Lütfen seçiminizi yapın (1, 2 veya 3):",
-            ['1', '2', '3']
-        );
-        
-        if (!secim) continue;
-
-        switch (secim) {
-            case '1':
-                bireyselOyunKurulum();
-                calisiyor = false; // Simülasyonu durdur
-                break;
-            case '2':
-                grupOyunuKurulum();
-                calisiyor = false; // Simülasyonu durdur
-                break;
-            case '3':
-                console.log("Oyundan çıkılıyor. Güle güle!");
-                calisiyor = false; 
-                break;
-            default:
-                console.log("Geçersiz seçim. Lütfen 1, 2 veya 3 giriniz.");
-        }
-    }
-}
-
-// Programı başlat
-anaMenu();
+    <script src="script.js"></script>
+</body>
+</html>
