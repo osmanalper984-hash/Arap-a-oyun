@@ -282,28 +282,28 @@
     <!-- ANA MENÜ -->
     <div id="mainMenu" class="screen active">
         <h1>🍽️ Arapça Yemekler Çarkıfelek 🍽️</h1>
-        <button class="menu-btn" id="btnIndividual">👤 BİREYSEL OYUN</button>
-        <button class="menu-btn" id="btnGroup">👥 GRUP OYUNU</button>
+        <button class="menu-btn" onclick="window.startIndividual()">👤 BİREYSEL OYUN</button>
+        <button class="menu-btn" onclick="window.showGroupMenu()">👥 GRUP OYUNU</button>
         <div class="creator">Yapımcı: RAMAZAN UMUT</div>
     </div>
 
     <!-- GRUP SAYISI SEÇİMİ -->
     <div id="groupMenu" class="screen">
         <h1>Kaç Grup Oynayacak?</h1>
-        <button class="option-btn" id="btn2Groups">2 GRUP</button>
-        <button class="option-btn" id="btn3Groups">3 GRUP</button>
-        <button class="option-btn" id="btn4Groups">4 GRUP</button>
-        <button class="menu-btn" id="btnBackFromGroup" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
+        <button class="option-btn" onclick="window.selectGroups(2)">2 GRUP</button>
+        <button class="option-btn" onclick="window.selectGroups(3)">3 GRUP</button>
+        <button class="option-btn" onclick="window.selectGroups(4)">4 GRUP</button>
+        <button class="menu-btn" onclick="window.showMainMenu()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
     </div>
 
     <!-- SÜRE SEÇİMİ -->
     <div id="timeMenu" class="screen">
         <h1>Süre Seçin</h1>
-        <button class="option-btn" id="btn30s">⏱️ 30 SANİYE</button>
-        <button class="option-btn" id="btn60s">⏱️ 60 SANİYE</button>
-        <button class="option-btn" id="btn90s">⏱️ 90 SANİYE</button>
-        <button class="option-btn" id="btnNoTime">∞ SÜRESİZ</button>
-        <button class="menu-btn" id="btnBackFromTime" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
+        <button class="option-btn" onclick="window.selectTime(30)">⏱️ 30 SANİYE</button>
+        <button class="option-btn" onclick="window.selectTime(60)">⏱️ 60 SANİYE</button>
+        <button class="option-btn" onclick="window.selectTime(90)">⏱️ 90 SANİYE</button>
+        <button class="option-btn" onclick="window.selectTime(0)">∞ SÜRESİZ</button>
+        <button class="menu-btn" onclick="window.backFromTime()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
     </div>
 
     <!-- OYUN EKRANI -->
@@ -321,7 +321,7 @@
             <canvas id="wheel" class="wheel" width="350" height="350"></canvas>
         </div>
 
-        <button class="spin-btn" id="spinBtn">ÇARKI ÇEVİR</button>
+        <button class="spin-btn" id="spinBtn" onclick="window.spinWheel()">ÇARKI ÇEVİR</button>
 
         <div class="question-area hidden" id="questionArea">
             <div class="question">Bu yemeğin Arapçası nedir?</div>
@@ -329,18 +329,56 @@
             <div class="options" id="options"></div>
         </div>
 
-        <button class="end-game-btn" id="btnEndGame">🏁 OYUNU BİTİR</button>
+        <button class="end-game-btn" id="btnEndGame" onclick="window.endGame()">🏁 OYUNU BİTİR</button>
     </div>
 
     <!-- SONUÇ EKRANI -->
     <div id="resultScreen" class="screen">
         <h1>🏆 OYUN BİTTİ! 🏆</h1>
         <div class="results" id="results"></div>
-        <button class="menu-btn" id="btnBackToMain">ANA MENÜYE DÖN</button>
+        <button class="menu-btn" id="btnBackToMain" onclick="window.showMainMenu()">ANA MENÜYE DÖN</button>
         <div class="creator">Yapımcı: RAMAZAN UMUT</div>
     </div>
 
     <script>
+        // Global fonksiyonlar
+        window.startIndividual = startIndividual;
+        window.showGroupMenu = showGroupMenu;
+        window.selectGroups = selectGroups;
+        window.showMainMenu = showMainMenu;
+        window.selectTime = selectTime;
+        window.backFromTime = backFromTime;
+        window.endGame = endGame;
+        window.spinWheel = spinWheel;
+
+        // Sayfa yüklenince başlat
+        window.onload = function() {
+            setupEventListeners();
+        };
+
+        function setupEventListeners() {
+            document.getElementById('btnIndividual').onclick = startIndividual;
+            document.getElementById('btnGroup').onclick = showGroupMenu;
+            document.getElementById('btn2Groups').onclick = function() { selectGroups(2); };
+            document.getElementById('btn3Groups').onclick = function() { selectGroups(3); };
+            document.getElementById('btn4Groups').onclick = function() { selectGroups(4); };
+            document.getElementById('btnBackFromGroup').onclick = showMainMenu;
+            document.getElementById('btn30s').onclick = function() { selectTime(30); };
+            document.getElementById('btn60s').onclick = function() { selectTime(60); };
+            document.getElementById('btn90s').onclick = function() { selectTime(90); };
+            document.getElementById('btnNoTime').onclick = function() { selectTime(0); };
+            document.getElementById('btnBackFromTime').onclick = function() {
+                if (gameMode === 'group') {
+                    showGroupMenu();
+                } else {
+                    showMainMenu();
+                }
+            };
+            document.getElementById('btnEndGame').onclick = endGame;
+            document.getElementById('btnBackToMain').onclick = showMainMenu;
+            document.getElementById('spinBtn').onclick = spinWheel;
+        }
+
         const foods = [
             {tr: "Ekmek", ar: "خُبْزٌ"},
             {tr: "Su", ar: "مَاءٌ"},
@@ -410,28 +448,6 @@
         const questionArea = document.getElementById('questionArea');
         const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
 
-        // Event Listeners
-        document.getElementById('btnIndividual').addEventListener('click', startIndividual);
-        document.getElementById('btnGroup').addEventListener('click', showGroupMenu);
-        document.getElementById('btn2Groups').addEventListener('click', () => selectGroups(2));
-        document.getElementById('btn3Groups').addEventListener('click', () => selectGroups(3));
-        document.getElementById('btn4Groups').addEventListener('click', () => selectGroups(4));
-        document.getElementById('btnBackFromGroup').addEventListener('click', showMainMenu);
-        document.getElementById('btn30s').addEventListener('click', () => selectTime(30));
-        document.getElementById('btn60s').addEventListener('click', () => selectTime(60));
-        document.getElementById('btn90s').addEventListener('click', () => selectTime(90));
-        document.getElementById('btnNoTime').addEventListener('click', () => selectTime(0));
-        document.getElementById('btnBackFromTime').addEventListener('click', () => {
-            if (gameMode === 'group') {
-                showGroupMenu();
-            } else {
-                showMainMenu();
-            }
-        });
-        document.getElementById('btnEndGame').addEventListener('click', endGame);
-        document.getElementById('btnBackToMain').addEventListener('click', showMainMenu);
-        document.getElementById('spinBtn').addEventListener('click', spinWheel);
-
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
@@ -462,6 +478,14 @@
             timeLimit = time;
             initGame();
             showScreen('gameScreen');
+        }
+
+        function backFromTime() {
+            if (gameMode === 'group') {
+                showGroupMenu();
+            } else {
+                showMainMenu();
+            }
         }
 
         function initGame() {
@@ -616,4 +640,73 @@
                 const btn = document.createElement('button');
                 btn.className = 'option';
                 btn.textContent = option.ar;
-                btn.a
+                btn.addEventListener('click', () => checkAnswer(option.ar, btn));
+                optionsDiv.appendChild(btn);
+            });
+
+            questionArea.classList.remove('hidden');
+        }
+
+        function checkAnswer(selected, btn) {
+            clearInterval(timerInterval);
+            document.getElementById('timer').classList.add('hidden');
+
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(opt => opt.classList.add('disabled'));
+
+            if (selected === currentFood.ar) {
+                btn.classList.add('correct');
+                groups[currentGroup].correct++;
+            } else {
+                btn.classList.add('wrong');
+                groups[currentGroup].wrong++;
+                
+                allOptions.forEach(opt => {
+                    if (opt.textContent === currentFood.ar) {
+                        opt.classList.add('correct');
+                    }
+                });
+            }
+
+            updateScoreBoard();
+
+            setTimeout(() => {
+                nextTurn();
+            }, 2000);
+        }
+
+        function nextTurn() {
+            if (gameMode === 'group') {
+                currentGroup = (currentGroup + 1) % numGroups;
+                updateCurrentTurn();
+            }
+            questionArea.classList.add('hidden');
+            spinBtn.disabled = false;
+            canvas.style.transform = 'rotate(0deg)';
+        }
+
+        function endGame() {
+            showScreen('resultScreen');
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('results');
+            
+            const sortedGroups = [...groups].sort((a, b) => b.correct - a.correct);
+            const winner = sortedGroups[0];
+
+            let html = `<div class="winner">🏆 KAZANAN: ${winner.name} 🏆</div>`;
+            html += '<h2>SKORLAR:</h2>';
+            
+            sortedGroups.forEach((g, i) => {
+                html += `<div style="margin: 15px 0; font-size: 1.5em;">
+                    ${i + 1}. ${g.name}: ✅ ${g.correct} - ❌ ${g.wrong}
+                </div>`;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
