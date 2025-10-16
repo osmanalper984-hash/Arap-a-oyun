@@ -205,7 +205,7 @@
             text-align: center;
             transition: all 0.3s;
             font-weight: bold;
-            direction: rtl;
+            direction: rtl; /* Arapça için sağdan sola */
         }
 
         .option:hover {
@@ -279,7 +279,6 @@
     </style>
 </head>
 <body>
-    <!-- ANA MENÜ -->
     <div id="mainMenu" class="screen active">
         <h1>🍽️ Arapça Yemekler Çarkıfelek 🍽️</h1>
         <button class="menu-btn" onclick="startIndividual()">👤 BİREYSEL OYUN</button>
@@ -287,7 +286,6 @@
         <div class="creator">Yapımcı: RAMAZAN UMUT</div>
     </div>
 
-    <!-- GRUP SAYISI SEÇİMİ -->
     <div id="groupMenu" class="screen">
         <h1>Kaç Grup Oynayacak?</h1>
         <button class="option-btn" onclick="selectGroups(2)">2 GRUP</button>
@@ -296,7 +294,6 @@
         <button class="menu-btn" onclick="showMainMenu()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
     </div>
 
-    <!-- SÜRE SEÇİMİ -->
     <div id="timeMenu" class="screen">
         <h1>Süre Seçin</h1>
         <button class="option-btn" onclick="selectTime(30)">⏱️ 30 SANİYE</button>
@@ -306,7 +303,6 @@
         <button class="menu-btn" onclick="showGroupMenu()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
     </div>
 
-    <!-- OYUN EKRANI -->
     <div id="gameScreen" class="screen">
         <h1>🍽️ Arapça Yemekler 🍽️</h1>
         
@@ -321,7 +317,7 @@
             <canvas id="wheel" class="wheel" width="350" height="350"></canvas>
         </div>
 
-        <button class="spin-btn" id="spinBtn">ÇARKI ÇEVİR</button>
+        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">ÇARKI ÇEVİR</button>
 
         <div class="question-area hidden" id="questionArea">
             <div class="question">Bu yemeğin Arapçası nedir?</div>
@@ -332,7 +328,6 @@
         <button class="end-game-btn" onclick="endGame()">🏁 OYUNU BİTİR</button>
     </div>
 
-    <!-- SONUÇ EKRANI -->
     <div id="resultScreen" class="screen">
         <h1>🏆 OYUN BİTTİ! 🏆</h1>
         <div class="results" id="results"></div>
@@ -386,7 +381,6 @@
             {tr: "Yoğurt", ar: "زَبَادِي"},
             {tr: "Tereyağı", ar: "زُبْدَةٌ"},
             {tr: "Reçel", ar: "مُرَبَّى"},
-            {tr: "Ekmek", ar: "خُبْزٌ"},
             {tr: "Börek", ar: "فَطِيرَةٌ"},
             {tr: "Köfte", ar: "كُفْتَةٌ"},
             {tr: "Kebap", ar: "كَبَابٌ"},
@@ -405,10 +399,16 @@
         let timeRemaining = 0;
 
         const canvas = document.getElementById('wheel');
-        const ctx = canvas.getContext('2d');
+        // Canvas'ın yüklendiğinden emin olmak için kontrol ekledim
+        const ctx = canvas ? canvas.getContext('2d') : null;
         const spinBtn = document.getElementById('spinBtn');
         const questionArea = document.getElementById('questionArea');
         const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+        // Eğer canvas bulunamazsa, çarkla ilgili fonksiyonları pasifize ettim
+        if (!canvas || !ctx) {
+            console.error("Canvas elemanı bulunamadı veya 2D context oluşturulamadı!");
+        }
 
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -420,6 +420,7 @@
             resetGame();
         }
 
+        // GRUP OYUNU BUTONUNU ÇALIŞTIRAN FONKSİYON
         function showGroupMenu() {
             showScreen('groupMenu');
         }
@@ -454,7 +455,10 @@
             currentGroup = 0;
             updateScoreBoard();
             updateCurrentTurn();
-            drawWheel();
+            // Canvas/Context varsa çarkı çiz
+            if (ctx) {
+                drawWheel();
+            }
         }
 
         function resetGame() {
@@ -463,6 +467,10 @@
             currentGroup = 0;
             isSpinning = false;
             questionArea.classList.add('hidden');
+            // Çarkı başlangıç pozisyonuna getir
+            if (canvas) {
+                canvas.style.transform = 'rotate(0deg)';
+            }
         }
 
         function updateScoreBoard() {
@@ -481,10 +489,14 @@
         }
 
         function drawWheel() {
+            if (!ctx) return; // Context yoksa çizme
+
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = canvas.width / 2 - 10;
             const sliceAngle = (2 * Math.PI) / foods.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Temizle
 
             for (let i = 0; i < foods.length; i++) {
                 ctx.beginPath();
@@ -507,18 +519,27 @@
         }
 
         function spinWheel() {
-            if (isSpinning) return;
+            if (isSpinning || !canvas) return; // Canvas yoksa çevirme
             
             isSpinning = true;
             spinBtn.disabled = true;
             questionArea.classList.add('hidden');
             clearInterval(timerInterval);
 
+            // Çarkı döndürecek rastgele bir yer seç
             const randomIndex = Math.floor(Math.random() * foods.length);
             currentFood = foods[randomIndex];
+
+            // Hedef açıyı hesapla (Pointer yukarı baktığı için dilimin ortasına denk getirmek için kaydırma yapılır)
+            const degreesPerSlice = 360 / foods.length;
+            const targetAngle = 360 - (randomIndex * degreesPerSlice + degreesPerSlice / 2);
+
+            // 5 tam turdan fazla döndür ve hedefe ayarla
+            const rotations = 360 * 5; 
+            const finalRotation = rotations + targetAngle + (Math.random() * (degreesPerSlice * 0.8) - (degreesPerSlice * 0.4)); // Biraz rastgelelik ekle
             
-            const rotations = 360 * 5 + (Math.random() * 360);
-            canvas.style.transform = `rotate(${rotations}deg)`;
+            canvas.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+            canvas.style.transform = `rotate(${finalRotation}deg)`;
 
             setTimeout(() => {
                 showQuestion();
@@ -527,7 +548,7 @@
                 if (timeLimit > 0) {
                     startTimer();
                 }
-            }, 4000);
+            }, 4000); // Dönüş süresi bitince
         }
 
         function startTimer() {
@@ -542,6 +563,8 @@
 
                 if (timeRemaining <= 10) {
                     timerEl.classList.add('warning');
+                } else {
+                    timerEl.classList.remove('warning');
                 }
 
                 if (timeRemaining <= 0) {
@@ -552,17 +575,22 @@
         }
 
         function updateTimerDisplay() {
-            document.getElementById('timer').textContent = `⏱️ ${timeRemaining}s`;
+            const timerEl = document.getElementById('timer');
+            if (timerEl) {
+                timerEl.textContent = `⏱️ ${timeRemaining}s`;
+            }
         }
 
         function handleTimeout() {
-            groups[currentGroup].wrong++;
+            if (groups[currentGroup]) { // Grup/oyuncu kontrolü
+                groups[currentGroup].wrong++;
+            }
             updateScoreBoard();
             
             const allOptions = document.querySelectorAll('.option');
             allOptions.forEach(opt => {
                 opt.classList.add('disabled');
-                if (opt.textContent === currentFood.ar) {
+                if (currentFood && opt.textContent === currentFood.ar) {
                     opt.classList.add('correct');
                 }
             });
@@ -573,8 +601,11 @@
         }
 
         function showQuestion() {
+            if (!currentFood) return; // Yiyecek seçilmemişse dur
+
             document.getElementById('foodName').textContent = currentFood.tr;
             
+            // Doğru cevap ve 3 yanlış cevap seç
             const wrongAnswers = foods.filter(f => f.ar !== currentFood.ar);
             const shuffled = wrongAnswers.sort(() => Math.random() - 0.5).slice(0, 3);
             const allOptions = [...shuffled, currentFood].sort(() => Math.random() - 0.5);
@@ -587,56 +618,4 @@
                 btn.className = 'option';
                 btn.textContent = option.ar;
                 btn.onclick = () => checkAnswer(option.ar, btn);
-                optionsDiv.appendChild(btn);
-            });
-
-            questionArea.classList.remove('hidden');
-        }
-
-        function checkAnswer(selected, btn) {
-            clearInterval(timerInterval);
-            document.getElementById('timer').classList.add('hidden');
-
-            const allOptions = document.querySelectorAll('.option');
-            allOptions.forEach(opt => opt.classList.add('disabled'));
-
-            if (selected === currentFood.ar) {
-                btn.classList.add('correct');
-                groups[currentGroup].correct++;
-            } else {
-                btn.classList.add('wrong');
-                groups[currentGroup].wrong++;
-                
-                allOptions.forEach(opt => {
-                    if (opt.textContent === currentFood.ar) {
-                        opt.classList.add('correct');
-                    }
-                });
-            }
-
-            updateScoreBoard();
-
-            setTimeout(() => {
-                nextTurn();
-            }, 2000);
-        }
-
-        function nextTurn() {
-            if (gameMode === 'group') {
-                currentGroup = (currentGroup + 1) % numGroups;
-                updateCurrentTurn();
-            }
-            questionArea.classList.add('hidden');
-            spinBtn.disabled = false;
-            canvas.style.transform = 'rotate(0deg)';
-        }
-
-        function endGame() {
-            showScreen('resultScreen');
-            displayResults();
-        }
-
-        function displayResults() {
-            const resultsDiv = document.getElementById('results');
-            
-            const sortedGroups = [...groups].sort((a, 
+                option
