@@ -1,621 +1,127 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arapça Yemekler Çarkıfelek</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+// Girdi almak için basit bir simülasyon fonksiyonu (Öncekiyle aynı)
+function simulateInput(message, validOptions) {
+    console.log(message);
+    console.log(`(Simülasyon: Geçerli seçenekler: ${validOptions.join(', ')} )`);
+    
+    let input;
+    if (validOptions.includes(2) || validOptions.includes(3) || validOptions.includes(4)) {
+        input = 2; // Grup oyuncu sayısı
+    } else if (validOptions.includes(30) || validOptions.includes(60) || validOptions.includes(90)) {
+        input = 60; // Süre
+    } else if (validOptions.includes('1') || validOptions.includes('2')) {
+        input = '2'; // Ana menü seçimi
+    } else {
+        input = validOptions[0];
+    }
+    
+    console.log(`[Simüle Edilen Seçim: ${input}]`);
+    
+    if (validOptions.includes(input.toString()) || validOptions.includes(parseInt(input))) {
+        return input.toString();
+    }
+    return null; 
+}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            color: white;
-        }
 
-        .screen {
-            display: none;
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-        }
+// Yeni Çark Mekanizması ve Arapça Yemekler
+const arapcaYemekler = [
+    "كُبَّة (Kibbeh)", "مَنْسَف (Mansaf)", "فَتُوش (Fattoush)", 
+    "مُحَمَّرَة (Muhammara)", "حُمُّص (Hummus)", "مَسْقُوف (Masgouf)", 
+    "مَقْلُوبَة (Maqluba)", "شَاوَرْمَا (Shawarma)", "فَلافِل (Falafel)",
+    "تَبُّولَة (Tabbouleh)", // 10 tane temsili yemek. 
+    // Gerçek uygulamada buraya 40 tane daha yemek eklenecek.
+];
 
-        .screen.active {
-            display: block;
-        }
+function carkiDondur() {
+    // Diziden rastgele bir indeks seçer
+    const randomIndex = Math.floor(Math.random() * arapcaYemekler.length);
+    const secilenYemek = arapcaYemekler[randomIndex];
+    
+    console.log("\n*** ÇARK DÖNDÜRÜLÜYOR... ***");
+    console.log(`--> Seçilen Yemek (SORU): ${secilenYemek}`);
+    console.log("***************************");
+    
+    return secilenYemek;
+}
 
-        h1 {
-            font-size: 3em;
-            margin-bottom: 30px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-        }
 
-        .menu-btn, .option-btn {
-            display: block;
-            width: 80%;
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            background: white;
-            color: #ff6b6b;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
+// Grup Oynama fonksiyonu (Kurulum ve Çark Kullanımı)
+function grupOyunuKurulum() {
+    console.log("\n--- Grup Oyunu Kurulumu ---");
 
-        .menu-btn:hover, .option-btn:hover {
-            transform: scale(1.05);
-        }
+    const oyuncuSayisi = simulateInput(
+        "Kaç kişi oynamak istersiniz (2, 3 veya 4)?",
+        [2, 3, 4]
+    );
 
-        .menu-btn:active, .option-btn:active {
-            transform: scale(0.95);
-        }
+    if (!oyuncuSayisi) return;
 
-        .score-board {
-            background: rgba(255,255,255,0.2);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
+    const sure = simulateInput(
+        `Her bir soru için ne kadar süreniz olsun (30, 60 veya 90 saniye)?`,
+        [30, 60, 90]
+    );
+    
+    if (!sure) return;
 
-        .group-score {
-            display: inline-block;
-            margin: 10px 20px;
-            font-size: 1.3em;
-            font-weight: bold;
-        }
+    console.log("\n--- Grup Oyunu Başlıyor ---");
+    console.log(`Oyuncu Sayısı: ${oyuncuSayisi}, Soru Başına Süre: ${sure} saniye.`);
+    
+    // Yemek çarkını döndür ve oyunu başlat
+    const ilkSoru = carkiDondur();
+    
+    console.log(`Şimdi grup olarak ${ilkSoru} yemeğini bilmeye çalışın! Süreniz: ${sure} saniye.`);
+}
 
-        .current-turn {
-            background: rgba(255,255,255,0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-        }
 
-        .timer {
-            background: rgba(255,255,255,0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 2em;
-            font-weight: bold;
-            color: #fff;
-        }
+// Bireysel Oynama fonksiyonu (Kurulum ve Çark Kullanımı)
+function bireyselOyunKurulum() {
+    console.log("\n--- Bireysel Oynama Seçeneği ---");
+    console.log("Bireysel oyun detayları henüz belirlenmemiştir. Ancak sorunuzu çark seçecek.");
+    
+    const ilkSoru = carkiDondur();
+    
+    console.log(`Şimdi tek başına ${ilkSoru} yemeğini bilmeye çalışın!`);
+}
 
-        .timer.warning {
-            background: rgba(255,0,0,0.5);
-            animation: pulse 1s infinite;
-        }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
+// Ana Menü fonksiyonu
+function anaMenu() {
+    let calisiyor = true;
 
-        .wheel-container {
-            position: relative;
-            width: 350px;
-            height: 350px;
-            margin: 0 auto 30px;
-        }
+    while (calisiyor) {
+        console.log("\n" + "=".repeat(30));
+        console.log("         ANA MENÜ");
+        console.log("=".repeat(30));
+        console.log("1 - Bireysel Oynama");
+        console.log("2 - Grup Oynama");
+        console.log("3 - Çıkış");
+        console.log("=".repeat(30));
 
-        .wheel {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 8px solid white;
-            position: relative;
-            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            box-shadow: 0 0 30px rgba(0,0,0,0.3);
-        }
-
-        .pointer {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 40px solid #fbbf24;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-            z-index: 10;
-        }
-
-        .spin-btn {
-            display: block;
-            margin: 0 auto 30px;
-            padding: 15px 50px;
-            font-size: 1.5em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
-
-        .spin-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .spin-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .question-area {
-            background: rgba(255,255,255,0.95);
-            padding: 30px;
-            border-radius: 20px;
-            margin-top: 30px;
-            color: #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .question {
-            font-size: 1.8em;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #ff6b6b;
-        }
-
-        .food-name {
-            font-size: 2.2em;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #feca57;
-            font-weight: bold;
-        }
-
-        .options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .option {
-            padding: 20px;
-            font-size: 1.5em;
-            background: white;
-            border: 3px solid #ff6b6b;
-            border-radius: 15px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            font-weight: bold;
-            direction: rtl; /* Arapça için sağdan sola */
-        }
-
-        .option:hover {
-            background: #ff6b6b;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .option.correct {
-            background: #4ade80;
-            border-color: #22c55e;
-            color: white;
-        }
-
-        .option.wrong {
-            background: #f87171;
-            border-color: #ef4444;
-            color: white;
-        }
-
-        .option.disabled {
-            pointer-events: none;
-            opacity: 0.7;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .end-game-btn {
-            margin: 20px auto;
-            padding: 15px 40px;
-            font-size: 1.3em;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .results {
-            background: rgba(255,255,255,0.95);
-            padding: 40px;
-            border-radius: 20px;
-            color: #333;
-            margin-top: 30px;
-        }
-
-        .winner {
-            font-size: 2.5em;
-            color: #feca57;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .creator {
-            margin-top: 30px;
-            padding: 20px;
-            color: white;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 2em; }
-            .wheel-container { width: 280px; height: 280px; }
-            .options { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body>
-    <div id="mainMenu" class="screen active">
-        <h1>🍽️ Arapça Yemekler Çarkıfelek 🍽️</h1>
-        <button class="menu-btn" onclick="startIndividual()">👤 BİREYSEL OYUN</button>
-        <button class="menu-btn" onclick="showGroupMenu()">👥 GRUP OYUNU</button>
-        <div class="creator">Yapımcı: RAMAZAN UMUT</div>
-    </div>
-
-    <div id="groupMenu" class="screen">
-        <h1>Kaç Grup Oynayacak?</h1>
-        <button class="option-btn" onclick="selectGroups(2)">2 GRUP</button>
-        <button class="option-btn" onclick="selectGroups(3)">3 GRUP</button>
-        <button class="option-btn" onclick="selectGroups(4)">4 GRUP</button>
-        <button class="menu-btn" onclick="showMainMenu()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
-    </div>
-
-    <div id="timeMenu" class="screen">
-        <h1>Süre Seçin</h1>
-        <button class="option-btn" onclick="selectTime(30)">⏱️ 30 SANİYE</button>
-        <button class="option-btn" onclick="selectTime(60)">⏱️ 60 SANİYE</button>
-        <button class="option-btn" onclick="selectTime(90)">⏱️ 90 SANİYE</button>
-        <button class="option-btn" onclick="selectTime(0)">∞ SÜRESİZ</button>
-        <button class="menu-btn" onclick="showGroupMenu()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
-    </div>
-
-    <div id="gameScreen" class="screen">
-        <h1>🍽️ Arapça Yemekler 🍽️</h1>
+        const secim = simulateInput(
+            "Lütfen seçiminizi yapın (1, 2 veya 3):",
+            ['1', '2', '3']
+        );
         
-        <div id="currentTurn" class="current-turn"></div>
-        
-        <div id="timer" class="timer hidden"></div>
-        
-        <div id="scoreBoard" class="score-board"></div>
+        if (!secim) continue;
 
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <canvas id="wheel" class="wheel" width="350" height="350"></canvas>
-        </div>
-
-        <button class="spin-btn" id="spinBtn" onclick="spinWheel()">ÇARKI ÇEVİR</button>
-
-        <div class="question-area hidden" id="questionArea">
-            <div class="question">Bu yemeğin Arapçası nedir?</div>
-            <div class="food-name" id="foodName"></div>
-            <div class="options" id="options"></div>
-        </div>
-
-        <button class="end-game-btn" onclick="endGame()">🏁 OYUNU BİTİR</button>
-    </div>
-
-    <div id="resultScreen" class="screen">
-        <h1>🏆 OYUN BİTTİ! 🏆</h1>
-        <div class="results" id="results"></div>
-        <button class="menu-btn" onclick="showMainMenu()">ANA MENÜYE DÖN</button>
-        <div class="creator">Yapımcı: RAMAZAN UMUT</div>
-    </div>
-
-    <script>
-        const foods = [
-            {tr: "Ekmek", ar: "خُبْزٌ"},
-            {tr: "Su", ar: "مَاءٌ"},
-            {tr: "Süt", ar: "حَلِيبٌ"},
-            {tr: "Çay", ar: "شَايٌ"},
-            {tr: "Kahve", ar: "قَهْوَةٌ"},
-            {tr: "Bal", ar: "عَسَلٌ"},
-            {tr: "Yumurta", ar: "بَيْضٌ"},
-            {tr: "Peynir", ar: "جُبْنٌ"},
-            {tr: "Zeytin", ar: "زَيْتُونٌ"},
-            {tr: "Yağ", ar: "زَيْتٌ"},
-            {tr: "Tuz", ar: "مِلْحٌ"},
-            {tr: "Şeker", ar: "سُكَّرٌ"},
-            {tr: "Pirinç", ar: "أَرُزٌّ"},
-            {tr: "Et", ar: "لَحْمٌ"},
-            {tr: "Tavuk", ar: "دَجَاجٌ"},
-            {tr: "Balık", ar: "سَمَكٌ"},
-            {tr: "Elma", ar: "تُفَّاحٌ"},
-            {tr: "Portakal", ar: "بُرْتُقَالٌ"},
-            {tr: "Muz", ar: "مَوْزٌ"},
-            {tr: "Üzüm", ar: "عِنَبٌ"},
-            {tr: "Kavun", ar: "بِطِّيخٌ"},
-            {tr: "Domates", ar: "طَمَاطِمُ"},
-            {tr: "Salatalık", ar: "خِيَارٌ"},
-            {tr: "Soğan", ar: "بَصَلٌ"},
-            {tr: "Sarımsak", ar: "ثُومٌ"},
-            {tr: "Patates", ar: "بَطَاطِسُ"},
-            {tr: "Havuç", ar: "جَزَرٌ"},
-            {tr: "Limon", ar: "لَيْمُونٌ"},
-            {tr: "Armut", ar: "كُمَّثْرَى"},
-            {tr: "Çilek", ar: "فَرَاوِلَةُ"},
-            {tr: "Çorba", ar: "شُورْبَةٌ"},
-            {tr: "Makarna", ar: "مَعْكَرُونَةُ"},
-            {tr: "Pilav", ar: "أَرُزٌّ مَطْبُوخٌ"},
-            {tr: "Salata", ar: "سَلَطَةٌ"},
-            {tr: "Dondurma", ar: "بُوظَةٌ"},
-            {tr: "Kek", ar: "كَعْكٌ"},
-            {tr: "Bisküvi", ar: "بِسْكُوتٌ"},
-            {tr: "Çikolata", ar: "شُوكُولَاتَةُ"},
-            {tr: "Pasta", ar: "كَعْكَةٌ"},
-            {tr: "Meyve Suyu", ar: "عَصِيرٌ"},
-            {tr: "Ayran", ar: "لَبَنٌ"},
-            {tr: "Yoğurt", ar: "زَبَادِي"},
-            {tr: "Tereyağı", ar: "زُبْدَةٌ"},
-            {tr: "Reçel", ar: "مُرَبَّى"},
-            {tr: "Börek", ar: "فَطِيرَةٌ"},
-            {tr: "Köfte", ar: "كُفْتَةٌ"},
-            {tr: "Kebap", ar: "كَبَابٌ"},
-            {tr: "Nohut", ar: "حُمُّصٌ"},
-            {tr: "Mercimek", ar: "عَدَسٌ"}
-        ];
-
-        let gameMode = 'individual';
-        let numGroups = 1;
-        let timeLimit = 60;
-        let currentGroup = 0;
-        let groups = [];
-        let currentFood = null;
-        let isSpinning = false;
-        let timerInterval = null;
-        let timeRemaining = 0;
-
-        const canvas = document.getElementById('wheel');
-        // Canvas'ın yüklendiğinden emin olmak için kontrol ekledim
-        const ctx = canvas ? canvas.getContext('2d') : null;
-        const spinBtn = document.getElementById('spinBtn');
-        const questionArea = document.getElementById('questionArea');
-        const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
-
-        // Eğer canvas bulunamazsa, çarkla ilgili fonksiyonları pasifize ettim
-        if (!canvas || !ctx) {
-            console.error("Canvas elemanı bulunamadı veya 2D context oluşturulamadı!");
+        switch (secim) {
+            case '1':
+                bireyselOyunKurulum();
+                calisiyor = false; // Simülasyonu durdur
+                break;
+            case '2':
+                grupOyunuKurulum();
+                calisiyor = false; // Simülasyonu durdur
+                break;
+            case '3':
+                console.log("Oyundan çıkılıyor. Güle güle!");
+                calisiyor = false; 
+                break;
+            default:
+                console.log("Geçersiz seçim. Lütfen 1, 2 veya 3 giriniz.");
         }
+    }
+}
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function showMainMenu() {
-            showScreen('mainMenu');
-            resetGame();
-        }
-
-        // GRUP OYUNU BUTONUNU ÇALIŞTIRAN FONKSİYON
-        function showGroupMenu() {
-            showScreen('groupMenu');
-        }
-
-        function startIndividual() {
-            gameMode = 'individual';
-            numGroups = 1;
-            showScreen('timeMenu');
-        }
-
-        function selectGroups(num) {
-            gameMode = 'group';
-            numGroups = num;
-            showScreen('timeMenu');
-        }
-
-        function selectTime(time) {
-            timeLimit = time;
-            initGame();
-            showScreen('gameScreen');
-        }
-
-        function initGame() {
-            groups = [];
-            for (let i = 0; i < numGroups; i++) {
-                groups.push({
-                    name: gameMode === 'individual' ? 'Oyuncu' : `Grup ${i + 1}`,
-                    correct: 0,
-                    wrong: 0
-                });
-            }
-            currentGroup = 0;
-            updateScoreBoard();
-            updateCurrentTurn();
-            // Canvas/Context varsa çarkı çiz
-            if (ctx) {
-                drawWheel();
-            }
-        }
-
-        function resetGame() {
-            clearInterval(timerInterval);
-            groups = [];
-            currentGroup = 0;
-            isSpinning = false;
-            questionArea.classList.add('hidden');
-            // Çarkı başlangıç pozisyonuna getir
-            if (canvas) {
-                canvas.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        function updateScoreBoard() {
-            const board = document.getElementById('scoreBoard');
-            board.innerHTML = groups.map(g => 
-                `<div class="group-score">${g.name}: ✅${g.correct} ❌${g.wrong}</div>`
-            ).join('');
-        }
-
-        function updateCurrentTurn() {
-            if (gameMode === 'group') {
-                document.getElementById('currentTurn').textContent = `Sıra: ${groups[currentGroup].name}`;
-            } else {
-                document.getElementById('currentTurn').textContent = '';
-            }
-        }
-
-        function drawWheel() {
-            if (!ctx) return; // Context yoksa çizme
-
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = canvas.width / 2 - 10;
-            const sliceAngle = (2 * Math.PI) / foods.length;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Temizle
-
-            for (let i = 0; i < foods.length; i++) {
-                ctx.beginPath();
-                ctx.fillStyle = colors[i % colors.length];
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, i * sliceAngle, (i + 1) * sliceAngle);
-                ctx.lineTo(centerX, centerY);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate(i * sliceAngle + sliceAngle / 2);
-                ctx.textAlign = 'center';
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 9px Arial';
-                ctx.fillText(foods[i].tr, radius / 2, 5);
-                ctx.restore();
-            }
-        }
-
-        function spinWheel() {
-            if (isSpinning || !canvas) return; // Canvas yoksa çevirme
-            
-            isSpinning = true;
-            spinBtn.disabled = true;
-            questionArea.classList.add('hidden');
-            clearInterval(timerInterval);
-
-            // Çarkı döndürecek rastgele bir yer seç
-            const randomIndex = Math.floor(Math.random() * foods.length);
-            currentFood = foods[randomIndex];
-
-            // Hedef açıyı hesapla (Pointer yukarı baktığı için dilimin ortasına denk getirmek için kaydırma yapılır)
-            const degreesPerSlice = 360 / foods.length;
-            const targetAngle = 360 - (randomIndex * degreesPerSlice + degreesPerSlice / 2);
-
-            // 5 tam turdan fazla döndür ve hedefe ayarla
-            const rotations = 360 * 5; 
-            const finalRotation = rotations + targetAngle + (Math.random() * (degreesPerSlice * 0.8) - (degreesPerSlice * 0.4)); // Biraz rastgelelik ekle
-            
-            canvas.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
-            canvas.style.transform = `rotate(${finalRotation}deg)`;
-
-            setTimeout(() => {
-                showQuestion();
-                isSpinning = false;
-                spinBtn.disabled = false;
-                if (timeLimit > 0) {
-                    startTimer();
-                }
-            }, 4000); // Dönüş süresi bitince
-        }
-
-        function startTimer() {
-            timeRemaining = timeLimit;
-            const timerEl = document.getElementById('timer');
-            timerEl.classList.remove('hidden', 'warning');
-            updateTimerDisplay();
-
-            timerInterval = setInterval(() => {
-                timeRemaining--;
-                updateTimerDisplay();
-
-                if (timeRemaining <= 10) {
-                    timerEl.classList.add('warning');
-                } else {
-                    timerEl.classList.remove('warning');
-                }
-
-                if (timeRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    handleTimeout();
-                }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            const timerEl = document.getElementById('timer');
-            if (timerEl) {
-                timerEl.textContent = `⏱️ ${timeRemaining}s`;
-            }
-        }
-
-        function handleTimeout() {
-            if (groups[currentGroup]) { // Grup/oyuncu kontrolü
-                groups[currentGroup].wrong++;
-            }
-            updateScoreBoard();
-            
-            const allOptions = document.querySelectorAll('.option');
-            allOptions.forEach(opt => {
-                opt.classList.add('disabled');
-                if (currentFood && opt.textContent === currentFood.ar) {
-                    opt.classList.add('correct');
-                }
-            });
-
-            setTimeout(() => {
-                nextTurn();
-            }, 2000);
-        }
-
-        function showQuestion() {
-            if (!currentFood) return; // Yiyecek seçilmemişse dur
-
-            document.getElementById('foodName').textContent = currentFood.tr;
-            
-            // Doğru cevap ve 3 yanlış cevap seç
-            const wrongAnswers = foods.filter(f => f.ar !== currentFood.ar);
-            const shuffled = wrongAnswers.sort(() => Math.random() - 0.5).slice(0, 3);
-            const allOptions = [...shuffled, currentFood].sort(() => Math.random() - 0.5);
-
-            const optionsDiv = document.getElementById('options');
-            optionsDiv.innerHTML = '';
-
-            allOptions.forEach(option => {
-                const btn = document.createElement('button');
-                btn.className = 'option';
-                btn.textContent = option.ar;
-                btn.onclick = () => checkAnswer(option.ar, btn);
-                option
+// Programı başlat
+anaMenu();
