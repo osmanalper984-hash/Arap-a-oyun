@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arapça Meslek Çarkıfelek</title>
+    <title>Arapça Yemekler Çarkıfelek</title>
     <style>
         * {
             margin: 0;
@@ -13,45 +13,100 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             padding: 20px;
             color: white;
         }
 
-        .container {
-            max-width: 800px;
+        .screen {
+            display: none;
             width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: block;
         }
 
         h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 3em;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
         }
 
-        .score {
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
+        .menu-btn, .option-btn {
+            display: block;
+            width: 80%;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            background: white;
+            color: #ff6b6b;
+            border: none;
             border-radius: 15px;
-            text-align: center;
-            margin-bottom: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .menu-btn:hover, .option-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .menu-btn:active, .option-btn:active {
+            transform: scale(0.95);
+        }
+
+        .score-board {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
             backdrop-filter: blur(10px);
         }
 
-        .score-item {
+        .group-score {
             display: inline-block;
-            margin: 0 20px;
+            margin: 10px 20px;
             font-size: 1.3em;
             font-weight: bold;
         }
 
-        .correct { color: #4ade80; }
-        .wrong { color: #f87171; }
+        .current-turn {
+            background: rgba(255,255,255,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .timer {
+            background: rgba(255,255,255,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .timer.warning {
+            background: rgba(255,0,0,0.5);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
 
         .wheel-container {
             position: relative;
@@ -103,10 +158,6 @@
             transform: scale(1.05);
         }
 
-        .spin-btn:active {
-            transform: scale(0.95);
-        }
-
         .spin-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -126,14 +177,14 @@
             text-align: center;
             margin-bottom: 10px;
             font-weight: bold;
-            color: #667eea;
+            color: #ff6b6b;
         }
 
-        .profession-name {
+        .food-name {
             font-size: 2.2em;
             text-align: center;
             margin-bottom: 30px;
-            color: #764ba2;
+            color: #feca57;
             font-weight: bold;
         }
 
@@ -148,7 +199,7 @@
             padding: 20px;
             font-size: 1.5em;
             background: white;
-            border: 3px solid #667eea;
+            border: 3px solid #ff6b6b;
             border-radius: 15px;
             cursor: pointer;
             text-align: center;
@@ -158,7 +209,7 @@
         }
 
         .option:hover {
-            background: #667eea;
+            background: #ff6b6b;
             color: white;
             transform: scale(1.05);
         }
@@ -184,8 +235,34 @@
             display: none;
         }
 
+        .end-game-btn {
+            margin: 20px auto;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .results {
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 20px;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        .winner {
+            font-size: 2.5em;
+            color: #feca57;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
         .creator {
-            text-align: center;
             margin-top: 30px;
             padding: 20px;
             color: white;
@@ -195,23 +272,49 @@
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 1.8em; }
+            h1 { font-size: 2em; }
             .wheel-container { width: 280px; height: 280px; }
             .options { grid-template-columns: 1fr; }
-            .option { font-size: 1.3em; }
-            .question { font-size: 1.4em; }
-            .profession-name { font-size: 1.8em; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎡 Arapça Meslek Çarkıfelek 🎡</h1>
+    <!-- ANA MENÜ -->
+    <div id="mainMenu" class="screen active">
+        <h1>🍽️ Arapça Yemekler Çarkıfelek 🍽️</h1>
+        <button class="menu-btn" onclick="startIndividual()">👤 BİREYSEL OYUN</button>
+        <button class="menu-btn" onclick="showGroupMenu()">👥 GRUP OYUNU</button>
+        <div class="creator">Yapımcı: RAMAZAN UMUT</div>
+    </div>
+
+    <!-- GRUP SAYISI SEÇİMİ -->
+    <div id="groupMenu" class="screen">
+        <h1>Kaç Grup Oynayacak?</h1>
+        <button class="option-btn" onclick="selectGroups(2)">2 GRUP</button>
+        <button class="option-btn" onclick="selectGroups(3)">3 GRUP</button>
+        <button class="option-btn" onclick="selectGroups(4)">4 GRUP</button>
+        <button class="menu-btn" onclick="showMainMenu()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
+    </div>
+
+    <!-- SÜRE SEÇİMİ -->
+    <div id="timeMenu" class="screen">
+        <h1>Süre Seçin</h1>
+        <button class="option-btn" onclick="selectTime(30)">⏱️ 30 SANİYE</button>
+        <button class="option-btn" onclick="selectTime(60)">⏱️ 60 SANİYE</button>
+        <button class="option-btn" onclick="selectTime(90)">⏱️ 90 SANİYE</button>
+        <button class="option-btn" onclick="selectTime(0)">∞ SÜRESİZ</button>
+        <button class="menu-btn" onclick="showGroupMenu()" style="background: #ef4444; color: white; margin-top: 30px;">GERİ</button>
+    </div>
+
+    <!-- OYUN EKRANI -->
+    <div id="gameScreen" class="screen">
+        <h1>🍽️ Arapça Yemekler 🍽️</h1>
         
-        <div class="score">
-            <div class="score-item correct">✅ Doğru: <span id="correct">0</span></div>
-            <div class="score-item wrong">❌ Yanlış: <span id="wrong">0</span></div>
-        </div>
+        <div id="currentTurn" class="current-turn"></div>
+        
+        <div id="timer" class="timer hidden"></div>
+        
+        <div id="scoreBoard" class="score-board"></div>
 
         <div class="wheel-container">
             <div class="pointer"></div>
@@ -221,89 +324,169 @@
         <button class="spin-btn" id="spinBtn">ÇARKI ÇEVİR</button>
 
         <div class="question-area hidden" id="questionArea">
-            <div class="question">Bu mesleğin Arapçası nedir?</div>
-            <div class="profession-name" id="professionName"></div>
+            <div class="question">Bu yemeğin Arapçası nedir?</div>
+            <div class="food-name" id="foodName"></div>
             <div class="options" id="options"></div>
         </div>
+
+        <button class="end-game-btn" onclick="endGame()">🏁 OYUNU BİTİR</button>
     </div>
 
-    <div class="creator">
-        Yapımcı: RAMAZAN UMUT
+    <!-- SONUÇ EKRANI -->
+    <div id="resultScreen" class="screen">
+        <h1>🏆 OYUN BİTTİ! 🏆</h1>
+        <div class="results" id="results"></div>
+        <button class="menu-btn" onclick="showMainMenu()">ANA MENÜYE DÖN</button>
+        <div class="creator">Yapımcı: RAMAZAN UMUT</div>
     </div>
 
     <script>
-        const professions = [
-            {tr: "Doktor", ar: "طَبِيبٌ"},
-            {tr: "Öğretmen", ar: "مُعَلِّمٌ"},
-            {tr: "Mühendis", ar: "مُهَنْدِسٌ"},
-            {tr: "Pilot", ar: "طَيَّارٌ"},
-            {tr: "Hemşire", ar: "مُمَرِّضَةٌ"},
-            {tr: "Polis", ar: "شُرْطِيٌّ"},
-            {tr: "Avukat", ar: "مُحَامٍ"},
-            {tr: "Aşçı", ar: "طَبَّاخٌ"},
-            {tr: "Berber", ar: "حَلَّاقٌ"},
-            {tr: "Terzi", ar: "خَيَّاطٌ"},
-            {tr: "Ressam", ar: "رَسَّامٌ"},
-            {tr: "Şarkıcı", ar: "مُغَنٍّ"},
-            {tr: "Sporcu", ar: "رِيَاضِيٌّ"},
-            {tr: "Gazeteci", ar: "صَحَفِيٌّ"},
-            {tr: "Fotoğrafçı", ar: "مُصَوِّرٌ"},
-            {tr: "Yazar", ar: "كَاتِبٌ"},
-            {tr: "Çiftçi", ar: "فَلَّاحٌ"},
-            {tr: "Kasap", ar: "قَصَّابٌ"},
-            {tr: "Bakkal", ar: "بَقَّالٌ"},
-            {tr: "Eczacı", ar: "صَيْدَلِيٌّ"},
-            {tr: "Dişçi", ar: "طَبِيبُ أَسْنَانٍ"},
-            {tr: "Asker", ar: "جُنْدِيٌّ"},
-            {tr: "İtfaiyeci", ar: "رَجُلُ إِطْفَاءٍ"},
-            {tr: "Postacı", ar: "سَاعِي بَرِيدٍ"},
-            {tr: "Sürücü", ar: "سَائِقٌ"},
-            {tr: "Marangoz", ar: "نَجَّارٌ"},
-            {tr: "Elektrikçi", ar: "كَهْرَبَائِيٌّ"},
-            {tr: "Boyacı", ar: "دَهَّانٌ"},
-            {tr: "Temizlikçi", ar: "عَامِلُ نَظَافَةٍ"},
-            {tr: "Garson", ar: "نَادِلٌ"},
-            {tr: "Muhasebeci", ar: "مُحَاسِبٌ"},
-            {tr: "Sekreter", ar: "سِكْرِتِيرٌ"},
-            {tr: "Çevirmen", ar: "مُتَرْجِمٌ"},
-            {tr: "Öğrenci", ar: "طَالِبٌ"},
-            {tr: "Müdür", ar: "مُدِيرٌ"},
-            {tr: "İşçi", ar: "عَامِلٌ"},
-            {tr: "Satıcı", ar: "بَائِعٌ"},
-            {tr: "Kütüphaneci", ar: "أَمِينُ مَكْتَبَةٍ"},
-            {tr: "Müzisyen", ar: "مُوسِيقِيٌّ"},
-            {tr: "Dalgıç", ar: "غَوَّاصٌ"},
-            {tr: "Bahçıvan", ar: "بُسْتَانِيٌّ"},
-            {tr: "Veteriner", ar: "طَبِيبٌ بَيْطَرِيٌّ"},
-            {tr: "Memur", ar: "مُوَظَّفٌ"},
-            {tr: "Hakim", ar: "قَاضٍ"},
-            {tr: "Sanatçı", ar: "فَنَّانٌ"},
-            {tr: "Bilim İnsanı", ar: "عَالِمٌ"},
-            {tr: "Balıkçı", ar: "صَيَّادُ سَمَكٍ"},
-            {tr: "Teknisyen", ar: "تِقْنِيٌّ"},
-            {tr: "Danışman", ar: "مُسْتَشَارٌ"},
-            {tr: "Rehber", ar: "دَلِيلٌ"}
+        const foods = [
+            {tr: "Ekmek", ar: "خُبْزٌ"},
+            {tr: "Su", ar: "مَاءٌ"},
+            {tr: "Süt", ar: "حَلِيبٌ"},
+            {tr: "Çay", ar: "شَايٌ"},
+            {tr: "Kahve", ar: "قَهْوَةٌ"},
+            {tr: "Bal", ar: "عَسَلٌ"},
+            {tr: "Yumurta", ar: "بَيْضٌ"},
+            {tr: "Peynir", ar: "جُبْنٌ"},
+            {tr: "Zeytin", ar: "زَيْتُونٌ"},
+            {tr: "Yağ", ar: "زَيْتٌ"},
+            {tr: "Tuz", ar: "مِلْحٌ"},
+            {tr: "Şeker", ar: "سُكَّرٌ"},
+            {tr: "Pirinç", ar: "أَرُزٌّ"},
+            {tr: "Et", ar: "لَحْمٌ"},
+            {tr: "Tavuk", ar: "دَجَاجٌ"},
+            {tr: "Balık", ar: "سَمَكٌ"},
+            {tr: "Elma", ar: "تُفَّاحٌ"},
+            {tr: "Portakal", ar: "بُرْتُقَالٌ"},
+            {tr: "Muz", ar: "مَوْزٌ"},
+            {tr: "Üzüm", ar: "عِنَبٌ"},
+            {tr: "Kavun", ar: "بِطِّيخٌ"},
+            {tr: "Domates", ar: "طَمَاطِمُ"},
+            {tr: "Salatalık", ar: "خِيَارٌ"},
+            {tr: "Soğan", ar: "بَصَلٌ"},
+            {tr: "Sarımsak", ar: "ثُومٌ"},
+            {tr: "Patates", ar: "بَطَاطِسُ"},
+            {tr: "Havuç", ar: "جَزَرٌ"},
+            {tr: "Limon", ar: "لَيْمُونٌ"},
+            {tr: "Armut", ar: "كُمَّثْرَى"},
+            {tr: "Çilek", ar: "فَرَاوِلَةُ"},
+            {tr: "Çorba", ar: "شُورْبَةٌ"},
+            {tr: "Makarna", ar: "مَعْكَرُونَةُ"},
+            {tr: "Pilav", ar: "أَرُزٌّ مَطْبُوخٌ"},
+            {tr: "Salata", ar: "سَلَطَةٌ"},
+            {tr: "Dondurma", ar: "بُوظَةٌ"},
+            {tr: "Kek", ar: "كَعْكٌ"},
+            {tr: "Bisküvi", ar: "بِسْكُوتٌ"},
+            {tr: "Çikolata", ar: "شُوكُولَاتَةُ"},
+            {tr: "Pasta", ar: "كَعْكَةٌ"},
+            {tr: "Meyve Suyu", ar: "عَصِيرٌ"},
+            {tr: "Ayran", ar: "لَبَنٌ"},
+            {tr: "Yoğurt", ar: "زَبَادِي"},
+            {tr: "Tereyağı", ar: "زُبْدَةٌ"},
+            {tr: "Reçel", ar: "مُرَبَّى"},
+            {tr: "Ekmek", ar: "خُبْزٌ"},
+            {tr: "Börek", ar: "فَطِيرَةٌ"},
+            {tr: "Köfte", ar: "كُفْتَةٌ"},
+            {tr: "Kebap", ar: "كَبَابٌ"},
+            {tr: "Nohut", ar: "حُمُّصٌ"},
+            {tr: "Mercimek", ar: "عَدَسٌ"}
         ];
 
-        let correctCount = 0;
-        let wrongCount = 0;
-        let currentProfession = null;
+        let gameMode = 'individual';
+        let numGroups = 1;
+        let timeLimit = 60;
+        let currentGroup = 0;
+        let groups = [];
+        let currentFood = null;
         let isSpinning = false;
+        let timerInterval = null;
+        let timeRemaining = 0;
 
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const spinBtn = document.getElementById('spinBtn');
         const questionArea = document.getElementById('questionArea');
-
         const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showMainMenu() {
+            showScreen('mainMenu');
+            resetGame();
+        }
+
+        function showGroupMenu() {
+            showScreen('groupMenu');
+        }
+
+        function startIndividual() {
+            gameMode = 'individual';
+            numGroups = 1;
+            showScreen('timeMenu');
+        }
+
+        function selectGroups(num) {
+            gameMode = 'group';
+            numGroups = num;
+            showScreen('timeMenu');
+        }
+
+        function selectTime(time) {
+            timeLimit = time;
+            initGame();
+            showScreen('gameScreen');
+        }
+
+        function initGame() {
+            groups = [];
+            for (let i = 0; i < numGroups; i++) {
+                groups.push({
+                    name: gameMode === 'individual' ? 'Oyuncu' : `Grup ${i + 1}`,
+                    correct: 0,
+                    wrong: 0
+                });
+            }
+            currentGroup = 0;
+            updateScoreBoard();
+            updateCurrentTurn();
+            drawWheel();
+        }
+
+        function resetGame() {
+            clearInterval(timerInterval);
+            groups = [];
+            currentGroup = 0;
+            isSpinning = false;
+            questionArea.classList.add('hidden');
+        }
+
+        function updateScoreBoard() {
+            const board = document.getElementById('scoreBoard');
+            board.innerHTML = groups.map(g => 
+                `<div class="group-score">${g.name}: ✅${g.correct} ❌${g.wrong}</div>`
+            ).join('');
+        }
+
+        function updateCurrentTurn() {
+            if (gameMode === 'group') {
+                document.getElementById('currentTurn').textContent = `Sıra: ${groups[currentGroup].name}`;
+            } else {
+                document.getElementById('currentTurn').textContent = '';
+            }
+        }
 
         function drawWheel() {
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = canvas.width / 2 - 10;
-            const sliceAngle = (2 * Math.PI) / professions.length;
+            const sliceAngle = (2 * Math.PI) / foods.length;
 
-            for (let i = 0; i < professions.length; i++) {
+            for (let i = 0; i < foods.length; i++) {
                 ctx.beginPath();
                 ctx.fillStyle = colors[i % colors.length];
                 ctx.moveTo(centerX, centerY);
@@ -317,8 +500,8 @@
                 ctx.rotate(i * sliceAngle + sliceAngle / 2);
                 ctx.textAlign = 'center';
                 ctx.fillStyle = 'white';
-                ctx.font = 'bold 10px Arial';
-                ctx.fillText(professions[i].tr, radius / 2, 5);
+                ctx.font = 'bold 9px Arial';
+                ctx.fillText(foods[i].tr, radius / 2, 5);
                 ctx.restore();
             }
         }
@@ -329,27 +512,72 @@
             isSpinning = true;
             spinBtn.disabled = true;
             questionArea.classList.add('hidden');
+            clearInterval(timerInterval);
 
-            const randomIndex = Math.floor(Math.random() * professions.length);
-            const sliceAngle = 360 / professions.length;
-            const targetRotation = 360 * 5 + (randomIndex * sliceAngle) + (sliceAngle / 2);
-
-            canvas.style.transform = `rotate(${targetRotation}deg)`;
+            const randomIndex = Math.floor(Math.random() * foods.length);
+            currentFood = foods[randomIndex];
+            
+            const rotations = 360 * 5 + (Math.random() * 360);
+            canvas.style.transform = `rotate(${rotations}deg)`;
 
             setTimeout(() => {
-                currentProfession = professions[randomIndex];
                 showQuestion();
                 isSpinning = false;
                 spinBtn.disabled = false;
+                if (timeLimit > 0) {
+                    startTimer();
+                }
             }, 4000);
         }
 
-        function showQuestion() {
-            document.getElementById('professionName').textContent = currentProfession.tr;
+        function startTimer() {
+            timeRemaining = timeLimit;
+            const timerEl = document.getElementById('timer');
+            timerEl.classList.remove('hidden', 'warning');
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 10) {
+                    timerEl.classList.add('warning');
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `⏱️ ${timeRemaining}s`;
+        }
+
+        function handleTimeout() {
+            groups[currentGroup].wrong++;
+            updateScoreBoard();
             
-            const wrongAnswers = professions.filter(p => p.ar !== currentProfession.ar);
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(opt => {
+                opt.classList.add('disabled');
+                if (opt.textContent === currentFood.ar) {
+                    opt.classList.add('correct');
+                }
+            });
+
+            setTimeout(() => {
+                nextTurn();
+            }, 2000);
+        }
+
+        function showQuestion() {
+            document.getElementById('foodName').textContent = currentFood.tr;
+            
+            const wrongAnswers = foods.filter(f => f.ar !== currentFood.ar);
             const shuffled = wrongAnswers.sort(() => Math.random() - 0.5).slice(0, 3);
-            const allOptions = [...shuffled, currentProfession].sort(() => Math.random() - 0.5);
+            const allOptions = [...shuffled, currentFood].sort(() => Math.random() - 0.5);
 
             const optionsDiv = document.getElementById('options');
             optionsDiv.innerHTML = '';
@@ -366,32 +594,49 @@
         }
 
         function checkAnswer(selected, btn) {
+            clearInterval(timerInterval);
+            document.getElementById('timer').classList.add('hidden');
+
             const allOptions = document.querySelectorAll('.option');
             allOptions.forEach(opt => opt.classList.add('disabled'));
 
-            if (selected === currentProfession.ar) {
+            if (selected === currentFood.ar) {
                 btn.classList.add('correct');
-                correctCount++;
-                document.getElementById('correct').textContent = correctCount;
+                groups[currentGroup].correct++;
             } else {
                 btn.classList.add('wrong');
-                wrongCount++;
-                document.getElementById('wrong').textContent = wrongCount;
+                groups[currentGroup].wrong++;
                 
                 allOptions.forEach(opt => {
-                    if (opt.textContent === currentProfession.ar) {
+                    if (opt.textContent === currentFood.ar) {
                         opt.classList.add('correct');
                     }
                 });
             }
 
+            updateScoreBoard();
+
             setTimeout(() => {
-                canvas.style.transform = 'rotate(0deg)';
+                nextTurn();
             }, 2000);
         }
 
-        spinBtn.addEventListener('click', spinWheel);
-        drawWheel();
-    </script>
-</body>
-</html>
+        function nextTurn() {
+            if (gameMode === 'group') {
+                currentGroup = (currentGroup + 1) % numGroups;
+                updateCurrentTurn();
+            }
+            questionArea.classList.add('hidden');
+            spinBtn.disabled = false;
+            canvas.style.transform = 'rotate(0deg)';
+        }
+
+        function endGame() {
+            showScreen('resultScreen');
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('results');
+            
+            const sortedGroups = [...groups].sort((a, 
